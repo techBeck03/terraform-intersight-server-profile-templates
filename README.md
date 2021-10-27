@@ -1,9 +1,11 @@
-# terraform-intersight-server-profile-templates
+# Terraform Intersight Server Profile Templates Module
 This module helps create Intersight Server Profile Templates for common use-cases.  This module is a work in progress and currently supports the following template use cases:
 
 - ESX
-  * `esx7_bfs_4nic_mlom` - ESX 7 configured for boot from SAN with 4 vNICs and 2 vHBAs
+  * `esx7_bfs_4nic_mlom` - ESX 7 configured for boot from SAN with 4 vNICs and 2 vHBAs using the `MLOM` adapter
 
+
+The main purpose of this module is to get up and running very quickly with server profile templates in Intersight.  More use cases and configuration options will be added in the future.
 
 ## Requirements
 
