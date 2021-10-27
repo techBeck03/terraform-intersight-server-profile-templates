@@ -1,10 +1,10 @@
 # =============================================================================
 # Server Profile Template
 # -----------------------------------------------------------------------------
-resource "intersight_server_profile_template" "esx7" {
-  count           = length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+resource "intersight_server_profile_template" "esx" {
+  count           = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
   name            = "${var.prefix}_esx_template"
-  description     = "Server profile template for ESX 7 servers"
+  description     = "Server profile template for ESX servers"
   target_platform = "FIAttached"
   organization {
     moid        = data.intersight_organization_organization.target.results[0].moid
@@ -16,7 +16,7 @@ resource "intersight_server_profile_template" "esx7" {
 # BIOS Policy
 # -----------------------------------------------------------------------------
 resource "intersight_bios_policy" "m6" {
-  count                = var.server_model == "m6" && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+  count                = var.server_model == "m6" && length(regexall("esx", var.template_name)) > 0 ? 1 : 0
   name                 = "${var.prefix}_esx_m6_bios"
   description          = "ESX optimized BIOS for M6 servers"
   cpu_perf_enhancement = "Auto"
@@ -32,7 +32,7 @@ resource "intersight_bios_policy" "m6" {
     }
   }
   profiles {
-    moid        = intersight_server_profile_template.esx7[0].moid
+    moid        = intersight_server_profile_template.esx[0].moid
     object_type = "server.ProfileTemplate"
   }
 }
@@ -41,7 +41,7 @@ resource "intersight_bios_policy" "m6" {
 # Boot Policy
 # -----------------------------------------------------------------------------
 resource "intersight_boot_precision_policy" "bfs" {
-  count                    = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+  count                    = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx", var.template_name)) > 0 ? 1 : 0
   name                     = "${var.prefix}_esx_bfs_boot"
   description              = "Boot from SAN for ESX"
   class_id                 = "boot.PrecisionPolicy"
@@ -94,7 +94,7 @@ resource "intersight_boot_precision_policy" "bfs" {
     }
   }
   profiles {
-    moid        = intersight_server_profile_template.esx7[0].moid
+    moid        = intersight_server_profile_template.esx[0].moid
     object_type = "server.ProfileTemplate"
   }
 }
@@ -102,10 +102,10 @@ resource "intersight_boot_precision_policy" "bfs" {
 # =============================================================================
 # vMedia Policy
 # -----------------------------------------------------------------------------
-resource "intersight_vmedia_policy" "esx7" {
-  count       = length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name        = "${var.prefix}_esx7_vmedia"
-  description = "vMedia policy for esx7 installs"
+resource "intersight_vmedia_policy" "esx" {
+  count       = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name        = "${var.prefix}_esx_vmedia"
+  description = "vMedia policy for esx installs"
   enabled     = true
   encryption  = true
 
@@ -121,7 +121,7 @@ resource "intersight_vmedia_policy" "esx7" {
     }
   }
   profiles {
-    moid        = intersight_server_profile_template.esx7[0].moid
+    moid        = intersight_server_profile_template.esx[0].moid
     object_type = "server.ProfileTemplate"
   }
 }
@@ -129,10 +129,10 @@ resource "intersight_vmedia_policy" "esx7" {
 # =============================================================================
 # IMC Access
 # -----------------------------------------------------------------------------
-resource "intersight_ippool_pool" "esx7" {
-  count            = length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name             = "${var.prefix}_esx7_ip_pool"
-  description      = "IP Pool for ESX 7 Servers"
+resource "intersight_ippool_pool" "esx" {
+  count            = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name             = "${var.prefix}_esx_ip_pool"
+  description      = "IP Pool for ESX Servers"
   assignment_order = "sequential"
   ip_v4_config {
     object_type   = "ippool.IpV4Config"
@@ -160,14 +160,14 @@ resource "intersight_ippool_pool" "esx7" {
   }
 }
 
-resource "intersight_access_policy" "esx7" {
-  count       = length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name        = "${var.prefix}_esx7_imc_access"
-  description = "IMC Access policy for ESX 7 servers"
+resource "intersight_access_policy" "esx" {
+  count       = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name        = "${var.prefix}_esx_imc_access"
+  description = "IMC Access policy for ESX servers"
   inband_vlan = var.imc_access.vlan_id
   inband_ip_pool {
     object_type = "ippool.Pool"
-    moid        = intersight_ippool_pool.esx7[0].moid
+    moid        = intersight_ippool_pool.esx[0].moid
   }
 
   organization {
@@ -182,7 +182,7 @@ resource "intersight_access_policy" "esx7" {
     }
   }
   profiles {
-    moid        = intersight_server_profile_template.esx7[0].moid
+    moid        = intersight_server_profile_template.esx[0].moid
     object_type = "server.ProfileTemplate"
   }
 }
@@ -190,10 +190,10 @@ resource "intersight_access_policy" "esx7" {
 # =============================================================================
 # Local users
 # -----------------------------------------------------------------------------
-resource "intersight_iam_end_point_user_policy" "esx7" {
-  count       = length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name        = "${var.prefix}_esx7_local_user"
-  description = "Local user policy for ESX 7 servers"
+resource "intersight_iam_end_point_user_policy" "esx" {
+  count       = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name        = "${var.prefix}_esx_local_user"
+  description = "Local user policy for ESX servers"
 
   password_properties {
     enforce_strong_password  = true
@@ -217,33 +217,33 @@ resource "intersight_iam_end_point_user_policy" "esx7" {
     }
   }
   profiles {
-    moid        = intersight_server_profile_template.esx7[0].moid
+    moid        = intersight_server_profile_template.esx[0].moid
     object_type = "server.ProfileTemplate"
   }
 }
 
 # Mapping of endpoint user to endpoint roles.
-resource "intersight_iam_end_point_user_role" "esx7" {
-  count    = length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+resource "intersight_iam_end_point_user_role" "esx" {
+  count    = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
   enabled  = true
   password = var.user_password
   end_point_role {
-    moid        = data.intersight_iam_end_point_role.esx7[0].results[0].moid
-    object_type = data.intersight_iam_end_point_role.esx7[0].results[0].object_type
+    moid        = data.intersight_iam_end_point_role.esx[0].results[0].moid
+    object_type = data.intersight_iam_end_point_role.esx[0].results[0].object_type
   }
   end_point_user {
-    moid        = intersight_iam_end_point_user.esx7[0].moid
-    object_type = intersight_iam_end_point_user.esx7[0].object_type
+    moid        = intersight_iam_end_point_user.esx[0].moid
+    object_type = intersight_iam_end_point_user.esx[0].object_type
   }
   end_point_user_policy {
-    moid        = intersight_iam_end_point_user_policy.esx7[0].moid
-    object_type = intersight_iam_end_point_user_policy.esx7[0].object_type
+    moid        = intersight_iam_end_point_user_policy.esx[0].moid
+    object_type = intersight_iam_end_point_user_policy.esx[0].object_type
   }
 }
 
-resource "intersight_iam_end_point_user" "esx7" {
-  count = length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name  = "${var.prefix}_esx7_user"
+resource "intersight_iam_end_point_user" "esx" {
+  count = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name  = "${var.prefix}_esx_user"
 
   organization {
     moid        = data.intersight_organization_organization.target.results[0].moid
@@ -259,8 +259,8 @@ resource "intersight_iam_end_point_user" "esx7" {
 }
 
 # get the IMC role named admin
-data "intersight_iam_end_point_role" "esx7" {
-  count = length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+data "intersight_iam_end_point_role" "esx" {
+  count = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
   name  = "admin"
   type  = "IMC"
 }
@@ -268,10 +268,10 @@ data "intersight_iam_end_point_role" "esx7" {
 # =============================================================================
 # KVM Policy
 # -----------------------------------------------------------------------------
-resource "intersight_kvm_policy" "esx7" {
-  count                     = length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name                      = "${var.prefix}_esx7_kvm_enabled"
-  description               = "KVM policy for ESX 7 servers"
+resource "intersight_kvm_policy" "esx" {
+  count                     = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name                      = "${var.prefix}_esx_kvm_enabled"
+  description               = "KVM policy for ESX servers"
   enable_local_server_video = true
   enable_video_encryption   = true
   enabled                   = true
@@ -290,7 +290,7 @@ resource "intersight_kvm_policy" "esx7" {
     }
   }
   profiles {
-    moid        = intersight_server_profile_template.esx7[0].moid
+    moid        = intersight_server_profile_template.esx[0].moid
     object_type = "server.ProfileTemplate"
   }
 }
@@ -298,9 +298,9 @@ resource "intersight_kvm_policy" "esx7" {
 # =============================================================================
 # Ethernet Network Policies
 # -----------------------------------------------------------------------------
-resource "intersight_vnic_eth_network_policy" "esx7_4nic_mgmt" {
-  count = length(regexall("esx7", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
-  name  = "${var.prefix}_esx7_net_policy_mgmt"
+resource "intersight_vnic_eth_network_policy" "esx_4nic_mgmt" {
+  count = length(regexall("esx", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
+  name  = "${var.prefix}_esx_net_policy_mgmt"
   vlan_settings {
     object_type   = "vnic.VlanSettings"
     default_vlan  = var.lan_connectivity.mgmt_vlan
@@ -321,9 +321,9 @@ resource "intersight_vnic_eth_network_policy" "esx7_4nic_mgmt" {
   }
 }
 
-resource "intersight_vnic_eth_network_policy" "esx7_4nic_vm" {
-  count = length(regexall("esx7", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
-  name  = "${var.prefix}_esx7_net_policy_vm"
+resource "intersight_vnic_eth_network_policy" "esx_4nic_vm" {
+  count = length(regexall("esx", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
+  name  = "${var.prefix}_esx_net_policy_vm"
   vlan_settings {
     object_type   = "vnic.VlanSettings"
     default_vlan  = var.lan_connectivity.default_vlan
@@ -347,10 +347,10 @@ resource "intersight_vnic_eth_network_policy" "esx7_4nic_vm" {
 # =============================================================================
 # Ethernet Network Control Policy
 # -----------------------------------------------------------------------------
-resource "intersight_fabric_eth_network_control_policy" "esx7" {
-  count       = length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name        = "${var.prefix}_esx7_net_control_policy"
-  description = "Network Control policy for ESX 7 servers"
+resource "intersight_fabric_eth_network_control_policy" "esx" {
+  count       = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name        = "${var.prefix}_esx_net_control_policy"
+  description = "Network Control policy for ESX servers"
   cdp_enabled = false
   forge_mac   = "allow"
   lldp_settings {
@@ -377,10 +377,10 @@ resource "intersight_fabric_eth_network_control_policy" "esx7" {
 # =============================================================================
 # Ethernet QoS Policies
 # -----------------------------------------------------------------------------
-resource "intersight_vnic_eth_qos_policy" "esx7_mgmt" {
-  count          = length(regexall("esx7", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
-  name           = "${var.prefix}_esx7_eth_qos_mgmt"
-  description    = "QoS policy for ESX 7 servers mgmt interfaces"
+resource "intersight_vnic_eth_qos_policy" "esx_mgmt" {
+  count          = length(regexall("esx", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
+  name           = "${var.prefix}_esx_eth_qos_mgmt"
+  description    = "QoS policy for ESX servers mgmt interfaces"
   mtu            = 9000
   rate_limit     = 0
   cos            = 0
@@ -401,10 +401,10 @@ resource "intersight_vnic_eth_qos_policy" "esx7_mgmt" {
   }
 }
 
-resource "intersight_vnic_eth_qos_policy" "esx7_vms" {
-  count          = length(regexall("esx7", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
-  name           = "${var.prefix}_esx7_eth_qos_vms"
-  description    = "QoS policy for ESX 7 servers vm interfaces"
+resource "intersight_vnic_eth_qos_policy" "esx_vms" {
+  count          = length(regexall("esx", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
+  name           = "${var.prefix}_esx_eth_qos_vms"
+  description    = "QoS policy for ESX servers vm interfaces"
   mtu            = 9000
   rate_limit     = 0
   cos            = 0
@@ -428,9 +428,9 @@ resource "intersight_vnic_eth_qos_policy" "esx7_vms" {
 # =============================================================================
 # Ethernet Adapter
 # -----------------------------------------------------------------------------
-resource "intersight_vnic_eth_adapter_policy" "esx7" {
-  count                   = length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name                    = "${var.prefix}_esx7_eth_adapter_policy"
+resource "intersight_vnic_eth_adapter_policy" "esx" {
+  count                   = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name                    = "${var.prefix}_esx_eth_adapter_policy"
   rss_settings            = false
   uplink_failback_timeout = 5
   vxlan_settings {
@@ -487,9 +487,9 @@ resource "intersight_vnic_eth_adapter_policy" "esx7" {
 # =============================================================================
 # LAN Connectivity
 # -----------------------------------------------------------------------------
-resource "intersight_vnic_lan_connectivity_policy" "esx7" {
-  count               = length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name                = "${var.prefix}_esx7_lan_connectivity"
+resource "intersight_vnic_lan_connectivity_policy" "esx" {
+  count               = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name                = "${var.prefix}_esx_lan_connectivity"
   description         = "LAN Connectivity for ESX servers"
   iqn_allocation_type = "None"
   placement_mode      = "custom"
@@ -507,18 +507,18 @@ resource "intersight_vnic_lan_connectivity_policy" "esx7" {
     }
   }
   profiles {
-    moid        = intersight_server_profile_template.esx7[0].moid
+    moid        = intersight_server_profile_template.esx[0].moid
     object_type = "server.ProfileTemplate"
   }
 }
 # =============================================================================
 # MAC Pool
 # -----------------------------------------------------------------------------
-resource "intersight_macpool_pool" "esx7" {
-  count            = length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name             = "${var.prefix}_esx7_mac_pool_a"
+resource "intersight_macpool_pool" "esx" {
+  count            = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name             = "${var.prefix}_esx_mac_pool_a"
   assignment_order = "sequential"
-  description      = "MAC Pool for ESX 7 A side interfaces"
+  description      = "MAC Pool for ESX A side interfaces"
   mac_blocks {
     object_type = "macpool.Block"
     from        = var.lan_connectivity.mac_pool_start
@@ -541,8 +541,8 @@ resource "intersight_macpool_pool" "esx7" {
 # =============================================================================
 # Virtual NICs
 # -----------------------------------------------------------------------------
-resource "intersight_vnic_eth_if" "esx7_4nic_mgmt_a" {
-  count = length(regexall("esx7", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
+resource "intersight_vnic_eth_if" "esx_4nic_mgmt_a" {
+  count = length(regexall("esx", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
   name  = "mgmt_a"
   order = 0
   placement {
@@ -568,23 +568,23 @@ resource "intersight_vnic_eth_if" "esx7_4nic_mgmt_a" {
 
   mac_address_type = "POOL"
   mac_pool {
-    moid = intersight_macpool_pool.esx7[0].id
+    moid = intersight_macpool_pool.esx[0].id
   }
 
   eth_network_policy {
-    moid = intersight_vnic_eth_network_policy.esx7_4nic_mgmt[0].id
+    moid = intersight_vnic_eth_network_policy.esx_4nic_mgmt[0].id
   }
   fabric_eth_network_control_policy {
-    moid = intersight_fabric_eth_network_control_policy.esx7[0].moid
+    moid = intersight_fabric_eth_network_control_policy.esx[0].moid
   }
   eth_adapter_policy {
-    moid = intersight_vnic_eth_adapter_policy.esx7[0].id
+    moid = intersight_vnic_eth_adapter_policy.esx[0].id
   }
   eth_qos_policy {
-    moid = intersight_vnic_eth_qos_policy.esx7_mgmt[0].id
+    moid = intersight_vnic_eth_qos_policy.esx_mgmt[0].id
   }
   lan_connectivity_policy {
-    moid        = intersight_vnic_lan_connectivity_policy.esx7[0].id
+    moid        = intersight_vnic_lan_connectivity_policy.esx[0].id
     object_type = "vnic.LanConnectivityPolicy"
   }
 
@@ -597,8 +597,8 @@ resource "intersight_vnic_eth_if" "esx7_4nic_mgmt_a" {
   }
 }
 
-resource "intersight_vnic_eth_if" "esx7_4nic_mgmt_b" {
-  count = length(regexall("esx7", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
+resource "intersight_vnic_eth_if" "esx_4nic_mgmt_b" {
+  count = length(regexall("esx", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
   name  = "mgmt_b"
   order = 1
   placement {
@@ -624,23 +624,23 @@ resource "intersight_vnic_eth_if" "esx7_4nic_mgmt_b" {
 
   mac_address_type = "POOL"
   mac_pool {
-    moid = intersight_macpool_pool.esx7[0].id
+    moid = intersight_macpool_pool.esx[0].id
   }
 
   eth_network_policy {
-    moid = intersight_vnic_eth_network_policy.esx7_4nic_mgmt[0].id
+    moid = intersight_vnic_eth_network_policy.esx_4nic_mgmt[0].id
   }
   fabric_eth_network_control_policy {
-    moid = intersight_fabric_eth_network_control_policy.esx7[0].moid
+    moid = intersight_fabric_eth_network_control_policy.esx[0].moid
   }
   eth_adapter_policy {
-    moid = intersight_vnic_eth_adapter_policy.esx7[0].id
+    moid = intersight_vnic_eth_adapter_policy.esx[0].id
   }
   eth_qos_policy {
-    moid = intersight_vnic_eth_qos_policy.esx7_mgmt[0].id
+    moid = intersight_vnic_eth_qos_policy.esx_mgmt[0].id
   }
   lan_connectivity_policy {
-    moid        = intersight_vnic_lan_connectivity_policy.esx7[0].id
+    moid        = intersight_vnic_lan_connectivity_policy.esx[0].id
     object_type = "vnic.LanConnectivityPolicy"
   }
 
@@ -653,8 +653,8 @@ resource "intersight_vnic_eth_if" "esx7_4nic_mgmt_b" {
   }
 }
 
-resource "intersight_vnic_eth_if" "esx7_4nic_vm_a" {
-  count = length(regexall("esx7", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
+resource "intersight_vnic_eth_if" "esx_4nic_vm_a" {
+  count = length(regexall("esx", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
   name  = "vm_a"
   order = 2
   placement {
@@ -680,23 +680,23 @@ resource "intersight_vnic_eth_if" "esx7_4nic_vm_a" {
 
   mac_address_type = "POOL"
   mac_pool {
-    moid = intersight_macpool_pool.esx7[0].id
+    moid = intersight_macpool_pool.esx[0].id
   }
 
   eth_network_policy {
-    moid = intersight_vnic_eth_network_policy.esx7_4nic_vm[0].id
+    moid = intersight_vnic_eth_network_policy.esx_4nic_vm[0].id
   }
   fabric_eth_network_control_policy {
-    moid = intersight_fabric_eth_network_control_policy.esx7[0].moid
+    moid = intersight_fabric_eth_network_control_policy.esx[0].moid
   }
   eth_adapter_policy {
-    moid = intersight_vnic_eth_adapter_policy.esx7[0].id
+    moid = intersight_vnic_eth_adapter_policy.esx[0].id
   }
   eth_qos_policy {
-    moid = intersight_vnic_eth_qos_policy.esx7_vms[0].id
+    moid = intersight_vnic_eth_qos_policy.esx_vms[0].id
   }
   lan_connectivity_policy {
-    moid        = intersight_vnic_lan_connectivity_policy.esx7[0].id
+    moid        = intersight_vnic_lan_connectivity_policy.esx[0].id
     object_type = "vnic.LanConnectivityPolicy"
   }
 
@@ -709,8 +709,8 @@ resource "intersight_vnic_eth_if" "esx7_4nic_vm_a" {
   }
 }
 
-resource "intersight_vnic_eth_if" "esx7_4nic_vm_b" {
-  count = length(regexall("esx7", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
+resource "intersight_vnic_eth_if" "esx_4nic_vm_b" {
+  count = length(regexall("esx", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
   name  = "vm_b"
   order = 3
   placement {
@@ -736,23 +736,23 @@ resource "intersight_vnic_eth_if" "esx7_4nic_vm_b" {
 
   mac_address_type = "POOL"
   mac_pool {
-    moid = intersight_macpool_pool.esx7[0].id
+    moid = intersight_macpool_pool.esx[0].id
   }
 
   eth_network_policy {
-    moid = intersight_vnic_eth_network_policy.esx7_4nic_vm[0].id
+    moid = intersight_vnic_eth_network_policy.esx_4nic_vm[0].id
   }
   fabric_eth_network_control_policy {
-    moid = intersight_fabric_eth_network_control_policy.esx7[0].moid
+    moid = intersight_fabric_eth_network_control_policy.esx[0].moid
   }
   eth_adapter_policy {
-    moid = intersight_vnic_eth_adapter_policy.esx7[0].id
+    moid = intersight_vnic_eth_adapter_policy.esx[0].id
   }
   eth_qos_policy {
-    moid = intersight_vnic_eth_qos_policy.esx7_vms[0].id
+    moid = intersight_vnic_eth_qos_policy.esx_vms[0].id
   }
   lan_connectivity_policy {
-    moid        = intersight_vnic_lan_connectivity_policy.esx7[0].id
+    moid        = intersight_vnic_lan_connectivity_policy.esx[0].id
     object_type = "vnic.LanConnectivityPolicy"
   }
 
@@ -768,15 +768,15 @@ resource "intersight_vnic_eth_if" "esx7_4nic_vm_b" {
 # =============================================================================
 # SAN Connectivity
 # -----------------------------------------------------------------------------
-resource "intersight_vnic_san_connectivity_policy" "esx7" {
-  count             = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name              = "${var.prefix}_esx7_san_connectivity"
+resource "intersight_vnic_san_connectivity_policy" "esx" {
+  count             = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name              = "${var.prefix}_esx_san_connectivity"
   description       = "SAN Connectivity for ESX servers"
   placement_mode    = "custom"
   target_platform   = "FIAttached"
   wwnn_address_type = "POOL"
   wwnn_pool {
-    moid = intersight_fcpool_pool.esx7_nwwn[0].id
+    moid = intersight_fcpool_pool.esx_nwwn[0].id
   }
 
   organization {
@@ -791,7 +791,7 @@ resource "intersight_vnic_san_connectivity_policy" "esx7" {
     }
   }
   profiles {
-    moid        = intersight_server_profile_template.esx7[0].moid
+    moid        = intersight_server_profile_template.esx[0].moid
     object_type = "server.ProfileTemplate"
   }
 }
@@ -799,10 +799,10 @@ resource "intersight_vnic_san_connectivity_policy" "esx7" {
 # =============================================================================
 # WWNN Address Pool
 # -----------------------------------------------------------------------------
-resource "intersight_fcpool_pool" "esx7_nwwn" {
-  count            = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name             = "${var.prefix}_esx7_nwwn_pool"
-  description      = "WWNN address pool for ESX 7 servers"
+resource "intersight_fcpool_pool" "esx_nwwn" {
+  count            = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name             = "${var.prefix}_esx_nwwn_pool"
+  description      = "WWNN address pool for ESX servers"
   assignment_order = "sequential"
   id_blocks {
     object_type = "fcpool.Block"
@@ -827,10 +827,10 @@ resource "intersight_fcpool_pool" "esx7_nwwn" {
 # =============================================================================
 # PWWN A Address Pool
 # -----------------------------------------------------------------------------
-resource "intersight_fcpool_pool" "esx7_pwwn_a" {
-  count            = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name             = "${var.prefix}_esx7_pwwn_a_pool"
-  description      = "A side PWWN address pool for ESX 7 servers"
+resource "intersight_fcpool_pool" "esx_pwwn_a" {
+  count            = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name             = "${var.prefix}_esx_pwwn_a_pool"
+  description      = "A side PWWN address pool for ESX servers"
   assignment_order = "sequential"
   id_blocks {
     object_type = "fcpool.Block"
@@ -855,10 +855,10 @@ resource "intersight_fcpool_pool" "esx7_pwwn_a" {
 # =============================================================================
 # PWWN B Address Pool
 # -----------------------------------------------------------------------------
-resource "intersight_fcpool_pool" "esx7_pwwn_b" {
-  count            = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name             = "${var.prefix}_esx7_pwwn_b_pool"
-  description      = "B side PWWN address pool for ESX 7 servers"
+resource "intersight_fcpool_pool" "esx_pwwn_b" {
+  count            = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name             = "${var.prefix}_esx_pwwn_b_pool"
+  description      = "B side PWWN address pool for ESX servers"
   assignment_order = "sequential"
   id_blocks {
     object_type = "fcpool.Block"
@@ -883,9 +883,9 @@ resource "intersight_fcpool_pool" "esx7_pwwn_b" {
 # =============================================================================
 # FC Network Policy (A-Side)
 # -----------------------------------------------------------------------------
-resource "intersight_vnic_fc_network_policy" "esx7_fc_net_a" {
-  count = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name  = "${var.prefix}_esx7_fc_net_policy_a"
+resource "intersight_vnic_fc_network_policy" "esx_fc_net_a" {
+  count = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name  = "${var.prefix}_esx_fc_net_policy_a"
   vsan_settings {
     id = var.san_connectivity.vsan_a_id
   }
@@ -906,9 +906,9 @@ resource "intersight_vnic_fc_network_policy" "esx7_fc_net_a" {
 # =============================================================================
 # FC Network Policy (B-Side)
 # -----------------------------------------------------------------------------
-resource "intersight_vnic_fc_network_policy" "esx7_fc_net_b" {
-  count = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name  = "${var.prefix}_esx7_fc_net_policy_b"
+resource "intersight_vnic_fc_network_policy" "esx_fc_net_b" {
+  count = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name  = "${var.prefix}_esx_fc_net_policy_b"
   vsan_settings {
     id = var.san_connectivity.vsan_b_id
   }
@@ -929,9 +929,9 @@ resource "intersight_vnic_fc_network_policy" "esx7_fc_net_b" {
 # =============================================================================
 # FC QoS Policy
 # -----------------------------------------------------------------------------
-resource "intersight_vnic_fc_qos_policy" "esx7" {
-  count               = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name                = "${var.prefix}_esx7_fc_qos"
+resource "intersight_vnic_fc_qos_policy" "esx" {
+  count               = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name                = "${var.prefix}_esx_fc_qos"
   rate_limit          = 0
   cos                 = 3
   max_data_field_size = 2112
@@ -954,9 +954,9 @@ resource "intersight_vnic_fc_qos_policy" "esx7" {
 # =============================================================================
 # FC Adapter Policy
 # -----------------------------------------------------------------------------
-resource "intersight_vnic_fc_adapter_policy" "esx7" {
-  count                   = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
-  name                    = "${var.prefix}_esx7_fc_adapter_policy"
+resource "intersight_vnic_fc_adapter_policy" "esx" {
+  count                   = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+  name                    = "${var.prefix}_esx_fc_adapter_policy"
   error_detection_timeout = 100000
   error_recovery_settings {
     enabled           = false
@@ -1014,8 +1014,8 @@ resource "intersight_vnic_fc_adapter_policy" "esx7" {
 # =============================================================================
 # Virtual HBAs
 # -----------------------------------------------------------------------------
-resource "intersight_vnic_fc_if" "esx7_hba_a" {
-  count = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+resource "intersight_vnic_fc_if" "esx_hba_a" {
+  count = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx", var.template_name)) > 0 ? 1 : 0
   name  = "hba_a"
   order = 4
   placement {
@@ -1026,26 +1026,26 @@ resource "intersight_vnic_fc_if" "esx7_hba_a" {
   persistent_bindings = true
   wwpn_address_type   = "POOL"
   wwpn_pool {
-    moid = intersight_fcpool_pool.esx7_pwwn_a[0].id
+    moid = intersight_fcpool_pool.esx_pwwn_a[0].id
   }
 
   san_connectivity_policy {
-    moid        = intersight_vnic_san_connectivity_policy.esx7[0].id
+    moid        = intersight_vnic_san_connectivity_policy.esx[0].id
     object_type = "vnic.SanConnectivityPolicy"
   }
   fc_network_policy {
-    moid = intersight_vnic_fc_network_policy.esx7_fc_net_a[0].id
+    moid = intersight_vnic_fc_network_policy.esx_fc_net_a[0].id
   }
   fc_adapter_policy {
-    moid = intersight_vnic_fc_adapter_policy.esx7[0].id
+    moid = intersight_vnic_fc_adapter_policy.esx[0].id
   }
   fc_qos_policy {
-    moid = intersight_vnic_fc_qos_policy.esx7[0].id
+    moid = intersight_vnic_fc_qos_policy.esx[0].id
   }
 }
 
-resource "intersight_vnic_fc_if" "esx7_hba_b" {
-  count = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+resource "intersight_vnic_fc_if" "esx_hba_b" {
+  count = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx", var.template_name)) > 0 ? 1 : 0
   name  = "hba_b"
   order = 5
   placement {
@@ -1056,20 +1056,20 @@ resource "intersight_vnic_fc_if" "esx7_hba_b" {
   persistent_bindings = true
   wwpn_address_type   = "POOL"
   wwpn_pool {
-    moid = intersight_fcpool_pool.esx7_pwwn_b[0].id
+    moid = intersight_fcpool_pool.esx_pwwn_b[0].id
   }
 
   san_connectivity_policy {
-    moid        = intersight_vnic_san_connectivity_policy.esx7[0].id
+    moid        = intersight_vnic_san_connectivity_policy.esx[0].id
     object_type = "vnic.SanConnectivityPolicy"
   }
   fc_network_policy {
-    moid = intersight_vnic_fc_network_policy.esx7_fc_net_b[0].id
+    moid = intersight_vnic_fc_network_policy.esx_fc_net_b[0].id
   }
   fc_adapter_policy {
-    moid = intersight_vnic_fc_adapter_policy.esx7[0].id
+    moid = intersight_vnic_fc_adapter_policy.esx[0].id
   }
   fc_qos_policy {
-    moid = intersight_vnic_fc_qos_policy.esx7[0].id
+    moid = intersight_vnic_fc_qos_policy.esx[0].id
   }
 }
