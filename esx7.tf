@@ -1,14 +1,55 @@
 # =============================================================================
 # Server Profile Template
 # -----------------------------------------------------------------------------
-resource "intersight_server_profile_template" "esx" {
-  count           = length(regexall("esx", var.template_name)) > 0 ? 1 : 0
+resource "intersight_server_profile_template" "esx7_bfs_4nic_mlom" {
+  count           = length(regexall("esx7_bfs_4nic_mlom", var.template_name)) > 0 ? 1 : 0
   name            = "${var.prefix}_esx_template"
   description     = "Server profile template for ESX servers"
   target_platform = "FIAttached"
+
+  policy_bucket {
+    moid        = intersight_bios_policy.m6[0].moid
+    object_type = "bios.Policy"
+  }
+  policy_bucket {
+    moid        = intersight_boot_precision_policy.bfs[0].moid
+    object_type = "boot.PrecisionPolicy"
+  }
+  policy_bucket {
+    moid        = intersight_vmedia_policy.esx[0].moid
+    object_type = "vmedia.Policy"
+  }
+  policy_bucket {
+    moid        = intersight_access_policy.esx[0].moid
+    object_type = "access.Policy"
+  }
+  policy_bucket {
+    moid        = intersight_iam_end_point_user_policy.esx[0].moid
+    object_type = "iam.EndPointUserPolicy"
+  }
+  policy_bucket {
+    moid        = intersight_kvm_policy.esx[0].moid
+    object_type = "kvm.Policy"
+  }
+  policy_bucket {
+    moid        = intersight_vnic_lan_connectivity_policy.esx[0].moid
+    object_type = "vnic.LanConnectivityPolicy"
+  }
+  policy_bucket {
+    moid        = intersight_vnic_san_connectivity_policy.esx[0].moid
+    object_type = "vnic.SanConnectivityPolicy"
+  }
+
   organization {
     moid        = data.intersight_organization_organization.target.results[0].moid
     object_type = "organization.Organization"
+  }
+  dynamic "tags" {
+    for_each = var.tags
+    content {
+      key   = tags.key
+      value = tags.value
+    }
   }
 }
 
@@ -31,10 +72,10 @@ resource "intersight_bios_policy" "m6" {
       value = tags.value
     }
   }
-  profiles {
-    moid        = intersight_server_profile_template.esx[0].moid
-    object_type = "server.ProfileTemplate"
-  }
+#   profiles {
+#     moid        = intersight_server_profile_template.esx[0].moid
+#     object_type = "server.ProfileTemplate"
+#   }
 }
 
 # =============================================================================
@@ -93,10 +134,10 @@ resource "intersight_boot_precision_policy" "bfs" {
       value = tags.value
     }
   }
-  profiles {
-    moid        = intersight_server_profile_template.esx[0].moid
-    object_type = "server.ProfileTemplate"
-  }
+#   profiles {
+#     moid        = intersight_server_profile_template.esx[0].moid
+#     object_type = "server.ProfileTemplate"
+#   }
 }
 
 # =============================================================================
@@ -120,10 +161,10 @@ resource "intersight_vmedia_policy" "esx" {
       value = tags.value
     }
   }
-  profiles {
-    moid        = intersight_server_profile_template.esx[0].moid
-    object_type = "server.ProfileTemplate"
-  }
+#   profiles {
+#     moid        = intersight_server_profile_template.esx[0].moid
+#     object_type = "server.ProfileTemplate"
+#   }
 }
 
 # =============================================================================
@@ -181,10 +222,10 @@ resource "intersight_access_policy" "esx" {
       value = tags.value
     }
   }
-  profiles {
-    moid        = intersight_server_profile_template.esx[0].moid
-    object_type = "server.ProfileTemplate"
-  }
+#   profiles {
+#     moid        = intersight_server_profile_template.esx[0].moid
+#     object_type = "server.ProfileTemplate"
+#   }
 }
 
 # =============================================================================
@@ -216,10 +257,10 @@ resource "intersight_iam_end_point_user_policy" "esx" {
       value = tags.value
     }
   }
-  profiles {
-    moid        = intersight_server_profile_template.esx[0].moid
-    object_type = "server.ProfileTemplate"
-  }
+#   profiles {
+#     moid        = intersight_server_profile_template.esx[0].moid
+#     object_type = "server.ProfileTemplate"
+#   }
 }
 
 # Mapping of endpoint user to endpoint roles.
@@ -289,10 +330,10 @@ resource "intersight_kvm_policy" "esx" {
       value = tags.value
     }
   }
-  profiles {
-    moid        = intersight_server_profile_template.esx[0].moid
-    object_type = "server.ProfileTemplate"
-  }
+#   profiles {
+#     moid        = intersight_server_profile_template.esx[0].moid
+#     object_type = "server.ProfileTemplate"
+#   }
 }
 
 # =============================================================================
@@ -305,7 +346,28 @@ resource "intersight_vnic_eth_network_policy" "esx_4nic_mgmt" {
     object_type   = "vnic.VlanSettings"
     default_vlan  = var.lan_connectivity.mgmt_vlan
     mode          = upper(var.lan_connectivity.mgmt_interface_mode)
-    allowed_vlans = var.lan_connectivity.default_vlan
+    allowed_vlans = var.lan_connectivity.mgmt_vlan
+  }
+
+  organization {
+    moid        = data.intersight_organization_organization.target.results[0].moid
+    object_type = "organization.Organization"
+  }
+  dynamic "tags" {
+    for_each = var.tags
+    content {
+      key   = tags.key
+      value = tags.value
+    }
+  }
+}
+
+resource "intersight_fabric_eth_network_group_policy" "esx_4nic_mgmt" {
+  count = length(regexall("esx", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
+  name  = "${var.prefix}_esx_net_group_policy_mgmt"
+  vlan_settings {
+    native_vlan   = var.lan_connectivity.mgmt_vlan
+    allowed_vlans = var.lan_connectivity.mgmt_vlan
   }
 
   organization {
@@ -328,6 +390,27 @@ resource "intersight_vnic_eth_network_policy" "esx_4nic_vm" {
     object_type   = "vnic.VlanSettings"
     default_vlan  = var.lan_connectivity.default_vlan
     mode          = "TRUNK"
+    allowed_vlans = var.lan_connectivity.vm_vlans
+  }
+
+  organization {
+    moid        = data.intersight_organization_organization.target.results[0].moid
+    object_type = "organization.Organization"
+  }
+  dynamic "tags" {
+    for_each = var.tags
+    content {
+      key   = tags.key
+      value = tags.value
+    }
+  }
+}
+
+resource "intersight_fabric_eth_network_group_policy" "esx_4nic_vm" {
+  count = length(regexall("esx", var.template_name)) > 0 && length(regexall("4nic", var.template_name)) > 0 ? 1 : 0
+  name  = "${var.prefix}_esx_net_group_policy_vm"
+  vlan_settings {
+    native_vlan   = var.lan_connectivity.default_vlan
     allowed_vlans = var.lan_connectivity.vm_vlans
   }
 
@@ -506,10 +589,10 @@ resource "intersight_vnic_lan_connectivity_policy" "esx" {
       value = tags.value
     }
   }
-  profiles {
-    moid        = intersight_server_profile_template.esx[0].moid
-    object_type = "server.ProfileTemplate"
-  }
+#   profiles {
+#     moid        = intersight_server_profile_template.esx[0].moid
+#     object_type = "server.ProfileTemplate"
+#   }
 }
 # =============================================================================
 # MAC Pool
@@ -574,6 +657,9 @@ resource "intersight_vnic_eth_if" "esx_4nic_mgmt_a" {
   eth_network_policy {
     moid = intersight_vnic_eth_network_policy.esx_4nic_mgmt[0].id
   }
+  fabric_eth_network_group_policy {
+    moid = intersight_fabric_eth_network_group_policy.esx_4nic_mgmt[0].id
+  }
   fabric_eth_network_control_policy {
     moid = intersight_fabric_eth_network_control_policy.esx[0].moid
   }
@@ -629,6 +715,9 @@ resource "intersight_vnic_eth_if" "esx_4nic_mgmt_b" {
 
   eth_network_policy {
     moid = intersight_vnic_eth_network_policy.esx_4nic_mgmt[0].id
+  }
+  fabric_eth_network_group_policy {
+    moid = intersight_fabric_eth_network_group_policy.esx_4nic_mgmt[0].id
   }
   fabric_eth_network_control_policy {
     moid = intersight_fabric_eth_network_control_policy.esx[0].moid
@@ -686,6 +775,9 @@ resource "intersight_vnic_eth_if" "esx_4nic_vm_a" {
   eth_network_policy {
     moid = intersight_vnic_eth_network_policy.esx_4nic_vm[0].id
   }
+  fabric_eth_network_group_policy {
+    moid = intersight_fabric_eth_network_group_policy.esx_4nic_vm[0].id
+  }
   fabric_eth_network_control_policy {
     moid = intersight_fabric_eth_network_control_policy.esx[0].moid
   }
@@ -742,6 +834,9 @@ resource "intersight_vnic_eth_if" "esx_4nic_vm_b" {
   eth_network_policy {
     moid = intersight_vnic_eth_network_policy.esx_4nic_vm[0].id
   }
+  fabric_eth_network_group_policy {
+    moid = intersight_fabric_eth_network_group_policy.esx_4nic_vm[0].id
+  }
   fabric_eth_network_control_policy {
     moid = intersight_fabric_eth_network_control_policy.esx[0].moid
   }
@@ -790,10 +885,10 @@ resource "intersight_vnic_san_connectivity_policy" "esx" {
       value = tags.value
     }
   }
-  profiles {
-    moid        = intersight_server_profile_template.esx[0].moid
-    object_type = "server.ProfileTemplate"
-  }
+#   profiles {
+#     moid        = intersight_server_profile_template.esx[0].moid
+#     object_type = "server.ProfileTemplate"
+#   }
 }
 
 # =============================================================================
