@@ -1,0 +1,3 @@
+provider "intersight" {
+  # Configuration options
+}

@@ -1,0 +1,6 @@
+test.auto.tfvars
+.terraform/
+.DS_Store
+terraform.tfstate
+.terraform.lock.hcl
+terraform.tfstate.backup
