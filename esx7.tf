@@ -764,3 +764,312 @@ resource "intersight_vnic_eth_if" "esx7_4nic_vm_b" {
     }
   }
 }
+
+# =============================================================================
+# SAN Connectivity
+# -----------------------------------------------------------------------------
+resource "intersight_vnic_san_connectivity_policy" "esx7" {
+  count             = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+  name              = "${var.prefix}_esx7_san_connectivity"
+  description       = "SAN Connectivity for ESX servers"
+  placement_mode    = "custom"
+  target_platform   = "FIAttached"
+  wwnn_address_type = "POOL"
+  wwnn_pool {
+    moid = intersight_fcpool_pool.esx7_nwwn[0].id
+  }
+
+  organization {
+    moid        = data.intersight_organization_organization.target.results[0].moid
+    object_type = "organization.Organization"
+  }
+  dynamic "tags" {
+    for_each = var.tags
+    content {
+      key   = tags.key
+      value = tags.value
+    }
+  }
+  profiles {
+    moid        = intersight_server_profile_template.esx7[0].moid
+    object_type = "server.ProfileTemplate"
+  }
+}
+
+# =============================================================================
+# WWNN Address Pool
+# -----------------------------------------------------------------------------
+resource "intersight_fcpool_pool" "esx7_nwwn" {
+  count            = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+  name             = "${var.prefix}_esx7_nwwn_pool"
+  description      = "WWNN address pool for ESX 7 servers"
+  assignment_order = "sequential"
+  id_blocks {
+    object_type = "fcpool.Block"
+    from        = var.san_connectivity.wwnn_pool_start
+    to          = var.san_connectivity.wwnn_pool_end
+  }
+  pool_purpose = "WWNN"
+
+  organization {
+    moid        = data.intersight_organization_organization.target.results[0].moid
+    object_type = "organization.Organization"
+  }
+  dynamic "tags" {
+    for_each = var.tags
+    content {
+      key   = tags.key
+      value = tags.value
+    }
+  }
+}
+
+# =============================================================================
+# PWWN A Address Pool
+# -----------------------------------------------------------------------------
+resource "intersight_fcpool_pool" "esx7_pwwn_a" {
+  count            = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+  name             = "${var.prefix}_esx7_pwwn_a_pool"
+  description      = "A side PWWN address pool for ESX 7 servers"
+  assignment_order = "sequential"
+  id_blocks {
+    object_type = "fcpool.Block"
+    from        = var.san_connectivity.pwwn_pool_a_start
+    to          = var.san_connectivity.pwwn_pool_a_end
+  }
+  pool_purpose = "WWPN"
+
+  organization {
+    moid        = data.intersight_organization_organization.target.results[0].moid
+    object_type = "organization.Organization"
+  }
+  dynamic "tags" {
+    for_each = var.tags
+    content {
+      key   = tags.key
+      value = tags.value
+    }
+  }
+}
+
+# =============================================================================
+# PWWN B Address Pool
+# -----------------------------------------------------------------------------
+resource "intersight_fcpool_pool" "esx7_pwwn_b" {
+  count            = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+  name             = "${var.prefix}_esx7_pwwn_b_pool"
+  description      = "B side PWWN address pool for ESX 7 servers"
+  assignment_order = "sequential"
+  id_blocks {
+    object_type = "fcpool.Block"
+    from        = var.san_connectivity.pwwn_pool_b_start
+    to          = var.san_connectivity.pwwn_pool_b_end
+  }
+  pool_purpose = "WWPN"
+
+  organization {
+    moid        = data.intersight_organization_organization.target.results[0].moid
+    object_type = "organization.Organization"
+  }
+  dynamic "tags" {
+    for_each = var.tags
+    content {
+      key   = tags.key
+      value = tags.value
+    }
+  }
+}
+
+# =============================================================================
+# FC Network Policy (A-Side)
+# -----------------------------------------------------------------------------
+resource "intersight_vnic_fc_network_policy" "esx7_fc_net_a" {
+  count = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+  name  = "${var.prefix}_esx7_fc_net_policy_a"
+  vsan_settings {
+    id = var.san_connectivity.vsan_a_id
+  }
+
+  organization {
+    moid        = data.intersight_organization_organization.target.results[0].moid
+    object_type = "organization.Organization"
+  }
+  dynamic "tags" {
+    for_each = var.tags
+    content {
+      key   = tags.key
+      value = tags.value
+    }
+  }
+}
+
+# =============================================================================
+# FC Network Policy (B-Side)
+# -----------------------------------------------------------------------------
+resource "intersight_vnic_fc_network_policy" "esx7_fc_net_b" {
+  count = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+  name  = "${var.prefix}_esx7_fc_net_policy_b"
+  vsan_settings {
+    id = var.san_connectivity.vsan_b_id
+  }
+
+  organization {
+    moid        = data.intersight_organization_organization.target.results[0].moid
+    object_type = "organization.Organization"
+  }
+  dynamic "tags" {
+    for_each = var.tags
+    content {
+      key   = tags.key
+      value = tags.value
+    }
+  }
+}
+
+# =============================================================================
+# FC QoS Policy
+# -----------------------------------------------------------------------------
+resource "intersight_vnic_fc_qos_policy" "esx7" {
+  count               = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+  name                = "${var.prefix}_esx7_fc_qos"
+  rate_limit          = 0
+  cos                 = 3
+  max_data_field_size = 2112
+  burst               = 10240
+  priority            = "FC"
+
+  organization {
+    moid        = data.intersight_organization_organization.target.results[0].moid
+    object_type = "organization.Organization"
+  }
+  dynamic "tags" {
+    for_each = var.tags
+    content {
+      key   = tags.key
+      value = tags.value
+    }
+  }
+}
+
+# =============================================================================
+# FC Adapter Policy
+# -----------------------------------------------------------------------------
+resource "intersight_vnic_fc_adapter_policy" "esx7" {
+  count                   = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+  name                    = "${var.prefix}_esx7_fc_adapter_policy"
+  error_detection_timeout = 100000
+  error_recovery_settings {
+    enabled           = false
+    io_retry_count    = 30
+    io_retry_timeout  = 5
+    link_down_timeout = 30000
+    port_down_timeout = 10000
+  }
+
+  flogi_settings {
+    retries = 8
+    timeout = 4000
+  }
+
+  interrupt_settings {
+    mode = "MSIx"
+  }
+
+  io_throttle_count = 256
+  lun_count         = 1024
+  lun_queue_depth   = 20
+
+  plogi_settings {
+    retries = 8
+    timeout = 20000
+  }
+  resource_allocation_timeout = 100000
+
+  rx_queue_settings {
+    nr_count  = 1
+    ring_size = 64
+  }
+  tx_queue_settings {
+    nr_count  = 1
+    ring_size = 64
+  }
+  scsi_queue_settings {
+    nr_count  = 1
+    ring_size = 152
+  }
+
+  organization {
+    moid        = data.intersight_organization_organization.target.results[0].moid
+    object_type = "organization.Organization"
+  }
+  dynamic "tags" {
+    for_each = var.tags
+    content {
+      key   = tags.key
+      value = tags.value
+    }
+  }
+}
+
+# =============================================================================
+# Virtual HBAs
+# -----------------------------------------------------------------------------
+resource "intersight_vnic_fc_if" "esx7_hba_a" {
+  count = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+  name  = "hba_a"
+  order = 4
+  placement {
+    id        = "MLOM"
+    pci_link  = 0
+    switch_id = "A"
+  }
+  persistent_bindings = true
+  wwpn_address_type   = "POOL"
+  wwpn_pool {
+    moid = intersight_fcpool_pool.esx7_pwwn_a[0].id
+  }
+
+  san_connectivity_policy {
+    moid        = intersight_vnic_san_connectivity_policy.esx7[0].id
+    object_type = "vnic.SanConnectivityPolicy"
+  }
+  fc_network_policy {
+    moid = intersight_vnic_fc_network_policy.esx7_fc_net_a[0].id
+  }
+  fc_adapter_policy {
+    moid = intersight_vnic_fc_adapter_policy.esx7[0].id
+  }
+  fc_qos_policy {
+    moid = intersight_vnic_fc_qos_policy.esx7[0].id
+  }
+}
+
+resource "intersight_vnic_fc_if" "esx7_hba_b" {
+  count = length(regexall("bfs", var.template_name)) > 0 && length(regexall("esx7", var.template_name)) > 0 ? 1 : 0
+  name  = "hba_b"
+  order = 5
+  placement {
+    id        = "MLOM"
+    pci_link  = 0
+    switch_id = "B"
+  }
+  persistent_bindings = true
+  wwpn_address_type   = "POOL"
+  wwpn_pool {
+    moid = intersight_fcpool_pool.esx7_pwwn_b[0].id
+  }
+
+  san_connectivity_policy {
+    moid        = intersight_vnic_san_connectivity_policy.esx7[0].id
+    object_type = "vnic.SanConnectivityPolicy"
+  }
+  fc_network_policy {
+    moid = intersight_vnic_fc_network_policy.esx7_fc_net_b[0].id
+  }
+  fc_adapter_policy {
+    moid = intersight_vnic_fc_adapter_policy.esx7[0].id
+  }
+  fc_qos_policy {
+    moid = intersight_vnic_fc_qos_policy.esx7[0].id
+  }
+}

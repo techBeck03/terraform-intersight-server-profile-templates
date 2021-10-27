@@ -86,3 +86,19 @@ variable "lan_connectivity" {
     error_message = "Attribute `lan_connectivity` must be one of [\"access\", \"trunk\"]."
   }
 }
+
+variable "san_connectivity" {
+  description = "SAN connectivity details"
+  type = object({
+    wwnn_pool_start   = string
+    wwnn_pool_end     = string
+    vsan_a_id         = number
+    vsan_b_id         = number
+    vsan_a_vlan       = number
+    vsan_b_vlan       = number
+    pwwn_pool_a_start = string
+    pwwn_pool_a_end   = string
+    pwwn_pool_b_start = string
+    pwwn_pool_b_end   = string
+  })
+}
